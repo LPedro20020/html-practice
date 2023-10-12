@@ -75,12 +75,23 @@
             //Draw border
             ctx.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-            //MAIN-----------------------------------------------
+            //MAIN-----------------------------------------------            
             main();
-            createFood();
             document.addEventListener("keydown", changeDirection);
 
             function main() {
+                mainGame();
+                createFood();
+                document.addEventListener('keydown', function(event) {
+                    if(event.keyCode == 32 && didGameEnd()) {
+                        resetGame();
+                        main();
+                    }
+                });
+            }
+
+            function mainGame() {
+                
                 if(didGameEnd()) return;
                 
                 setTimeout(function onTick() {
@@ -90,7 +101,7 @@
                     advanceSnake();
                     drawSnake();
 
-                    main();
+                    mainGame();
                 }, GAME_SPEED);
             }
 
@@ -203,6 +214,22 @@
                 const hitBottomWall = snake[0].y > gameCanvas.height - 10;
 
                 return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall;
+            }
+
+            function resetGame() {
+                snake = [
+                    {x: 150, y: 150},
+                    {x: 140, y: 150},
+                    {x: 130, y: 150},
+                    {x: 120, y: 150},
+                    {x: 110, y: 150}
+                ];
+
+                dx = 10;
+                dy = 0;
+
+                score = 0;
+                document.getElementById("score").innerHTML = "Score: " + score;
             }
         </script>
     </body>
