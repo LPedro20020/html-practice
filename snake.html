@@ -4,10 +4,10 @@
         <title>SNAKE!</title>
     </head>
 
-    <body>
-
-        <div id = "score">0</div>
+    <body bgcolor="black">
+        <div id = "score">Score: 0</div>
         <canvas id = "gameCanvas" width = "300" height = "300"></canvas>
+        <div id = "title">SNAKE!</div>
 
         <style>
             #gameCanvas {
@@ -18,18 +18,29 @@
             }
 
             #score {
-                text-align: center;
-                font-size: 140px;
+                color: blue;
+                text-align: left;
+                font-size: 70px;
                 font-family: 'Franklin Gothic Medium', sans-serif;
+            }
+
+            #title{
+                text-align: center;
+                position: absolute;
+                left: 12.5%;
+                bottom: 0%;
+                color: blue;
+                font-size: 140px;
+                font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
             }
         </style>
         
         <script>
             //CONSTANTS----------------------------
-            const CANVAS_BORDER_COLOR = "black";
-            const CANVAS_BACKGROUND_COLOR = "white";
-            const SNAKE_COLOR = "lightgreen";
-            const SNAKE_BORDER_COLOR = "darkgreen";
+            const CANVAS_BORDER_COLOR = "white";
+            const CANVAS_BACKGROUND_COLOR = "darkgray";
+            const SNAKE_COLOR = "blue";
+            const SNAKE_BORDER_COLOR = "darkblue";
             const FOOD_COLOR = "red";
             const FOOD_BORDER_COLOR = "darkred";
             const GAME_SPEED = 100;
@@ -148,7 +159,7 @@
                 const didEatFood = snake[0].x === foodX && snake[0].y === foodY;
                 if(didEatFood) {
                     score += 10;
-                    document.getElementById("score").innerHTML = score;
+                    document.getElementById("score").innerHTML = "Score: " + score;
 
                     createFood();
                 } else {
