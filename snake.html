@@ -6,7 +6,23 @@
 
     <body>
 
+        <div id = "score">0</div>
         <canvas id = "gameCanvas" width = "300" height = "300"></canvas>
+
+        <style>
+            #gameCanvas {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            #score {
+                text-align: center;
+                font-size: 140px;
+                font-family: 'Franklin Gothic Medium', sans-serif;
+            }
+        </style>
         
         <script>
             //CONSTANTS----------------------------
@@ -14,46 +30,10 @@
             const CANVAS_BACKGROUND_COLOR = "white";
             const SNAKE_COLOR = "lightgreen";
             const SNAKE_BORDER_COLOR = "darkgreen";
+            const FOOD_COLOR = "red";
+            const FOOD_BORDER_COLOR = "darkred";
+            const GAME_SPEED = 100;
 
-            //get canvas element
-            var gameCanvas = document.getElementById("gameCanvas");
-
-            //return 2d drawing context
-            var ctx = gameCanvas.getContext("2d");
-
-            //select color to fill canvas
-            ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
-            //selecct color border
-            ctx.strokeStyle = CANVAS_BORDER_COLOR;
-
-            //draw filled rect
-            ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-            //Draw border
-            ctx.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
-
-            function main() {
-                setTimeout(function onTick() {
-                    clearCanvas();
-                    advanceSnake();
-                    drawSnake();
-
-                    main();
-                }, 100);
-            }
-
-            main();
-            document.addEventListener("keydown", changeDirection);
-
-            //BOARD MANIPULATION--------------------------------------------
-            function clearCanvas() {
-                ctx.fillStyle = "white";
-                ctx.strokeStyle = "black";
-
-                ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-                ctx.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
-            }
-
-            //MAKE SNAKE-------------------------------------------
             let snake = [
                 {x: 150, y: 150},
                 {x: 140, y: 150},
@@ -64,7 +44,55 @@
 
             let dx = 10;
             let dy = 0;
+            
+            let foodX;
+            let foodY;
 
+            let score = 0;
+
+            let changingDirection;
+
+            //MAKE BOARD--------------------------------------------------
+            //get canvas element
+            var gameCanvas = document.getElementById("gameCanvas");
+
+            //return 2d drawing context
+            var ctx = gameCanvas.getContext("2d");
+
+            //draw filled rect
+            ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+            //Draw border
+            ctx.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+            //MAIN-----------------------------------------------
+            main();
+            createFood();
+            document.addEventListener("keydown", changeDirection);
+
+            function main() {
+                if(didGameEnd()) return;
+                
+                setTimeout(function onTick() {
+                    changingDirection = false;
+                    clearCanvas();
+                    drawFood();
+                    advanceSnake();
+                    drawSnake();
+
+                    main();
+                }, GAME_SPEED);
+            }
+
+            //BOARD MANIPULATION--------------------------------------------
+            function clearCanvas() {
+                ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
+                ctx.strokeStyle = CANVAS_BORDER_COLOR;
+
+                ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+                ctx.strokeRect(0, 0, gameCanvas.width, gameCanvas.height);
+            }
+
+            //MAKE SNAKE-------------------------------------------
             //prints snake on canvas
             function drawSnake() {
                 snake.forEach(drawSnakePart);
@@ -85,6 +113,11 @@
                 const RIGHT_KEY = 39;
                 const UP_KEY = 38;
                 const DOWN_KEY = 40;
+
+                if(changingDirection) return;
+
+                changingDirection = true;
+
                 const keyPressed = event.keyCode;
                 const goingUp = dy === -10;
                 const goingDown = dy === 10;
@@ -111,8 +144,54 @@
             function advanceSnake() {
                 const head = {x: snake[0].x + dx, y: snake[0].y + dy};
                 snake.unshift(head);
-                snake.pop();
-                drawSnake();
+
+                const didEatFood = snake[0].x === foodX && snake[0].y === foodY;
+                if(didEatFood) {
+                    score += 10;
+                    document.getElementById("score").innerHTML = score;
+
+                    createFood();
+                } else {
+                    snake.pop();
+                }
+            }
+
+            //MAKE FOOD-------------------------------
+            function randomTen(min, max) {
+                return Math.round((Math.random() * (max-min) + min)/10) * 10;
+            }
+
+            function createFood() {
+                foodX = randomTen(0, gameCanvas.width - 10);
+                foodY = randomTen(0, gameCanvas.height - 10);
+
+                snake.forEach(function isFoodOnSnake(part) {
+                    if (part.x == foodX && part.y == foodY) {
+                        createFood();
+                    }
+                });
+            }
+
+            function drawFood() {
+                ctx.fillStyle = FOOD_COLOR;
+                ctx.strokeStyle = FOOD_BORDER_COLOR;
+                ctx.fillRect(foodX, foodY, 10, 10);
+                ctx.strokeRect(foodX, foodY, 10, 10);
+            }
+            
+            //GAME MANAGEMENT--------------------------------
+            function didGameEnd() {
+                for(let i = 4; i < snake.length; i++) {
+                    const didCollide = snake[i].x === snake[0].x && snake[i].y === snake[0].y;
+                    if(didCollide) return true;
+                }
+
+                const hitLeftWall = snake[0].x < 0;
+                const hitRightWall = snake[0].x > gameCanvas.width - 10;
+                const hitToptWall = snake[0].y < 0;
+                const hitBottomWall = snake[0].y > gameCanvas.height - 10;
+
+                return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall;
             }
         </script>
     </body>
