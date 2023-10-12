@@ -80,8 +80,17 @@
             document.addEventListener("keydown", changeDirection);
 
             function main() {
-                mainGame();
-                createFood();
+                //start game
+                let gameOn = false;
+                document.addEventListener('keydown', function(event) {
+                    if(event.keyCode == 32 && didGameEnd() == false && gameOn == false) {
+                        gameOn = true;
+                        mainGame();
+                        createFood();
+                    }
+                });
+                
+                //restart game
                 document.addEventListener('keydown', function(event) {
                     if(event.keyCode == 32 && didGameEnd()) {
                         resetGame();
